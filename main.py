@@ -2,6 +2,27 @@ import pygame, sys
 from pygame.locals import *
 import  random, time
 def main():
+    pygame.init()
+    #設置背景
+    screen = pygame.display.set_mode((480, 800))
+    #設置背景圖片
+    image_bg1 = pygame.image.load('images/bg4.png')
+    image_bg2 = pygame.image.load('images/bg3.png')
+    #enemy
+    image_enemy1 = pygame.image.load('images/enemy1.png')
+    image_enemy2 = pygame.image.load('images/enemy2.png')
+    #縮小
+    image_enemy2 = pygame.transform.scale(image_enemy2, (195//2 , 142//2))
+    image_enemy3 = pygame.image.load('images/enemy3.png')
+    image_enemy3 = pygame.transform.scale(image_enemy3, (180 // 2, 169 // 2))
+    image_enemy4 = pygame.image.load('images/enemy4.png')
+    image_enemy4 = pygame.transform.scale(image_enemy4, (156 // 2, 124 // 2))
+    #hero
+    image_hero = pygame.image.load('images/hero.png')
+    image_bullet_hero =  pygame.image.load('images/Mybullet.png')
+
+    screen.blit(image_bg1,(0,0))
+
     class Bg:
         #產生背景 兩張圖 Y軸遞減營造向上感覺
         def __init__(self):
@@ -30,6 +51,7 @@ def main():
             self.width = width
             self.height = height
             self.x = int((480-self.width)*random.random())
+            #畫布最上方出現
             self.y = -self.height
         def draw(self):
             screen.blit(self.image, (self.x , self.y))
@@ -52,17 +74,23 @@ def main():
             if n == 4:
                 list_enemies.append(Enemy(image_enemy4, 156//2, 124//2))
             lastTime = now
-    def draw_and_step_enemy():
+
+    list_bullet = []
+    def draw_Component():
         for enemy in list_enemies:
             enemy.draw()
             enemy.step()
+        for bullet in list_bullet:
+            bullet.draw()
+            bullet.step()
 
-    def delete_enemy():
+    def deleteCanvaousComponent():
         for enemy in list_enemies:
             if enemy.y >= 800:
                 list_enemies.remove(enemy)
-
-
+        for bullet in list_bullet:
+            if bullet.y < -bullet.height:
+                list_bullet.remove(bullet)
     class Hero:
         def __init__(self):
             self.x = 200
@@ -72,34 +100,37 @@ def main():
             self.image = image_hero
         def draw(self):
             screen.blit(self.image,(self.x, self.y))
+
+    class Bullet:
+        def __init__(self):
+            self.height = 55
+            self.width = 31
+            self.x = hero.x + hero.width/2 - self.width/2
+            self.y = hero.y - self.height/2
+
+            self.image = image_bullet_hero
+        def draw(self):
+            screen.blit(self.image, (self.x, self.y))
+        def step(self):
+            self.y -= 3
+
+    def heroBullet():
+        global herobulletTime
+        now = time.time()
+        if now - herobulletTime > 0.3:
+            list_bullet.append(Bullet())
+            herobulletTime = now
     def running():
         bg.draw()
         bg.step()
         makeEnemies()
-        draw_and_step_enemy()
-        delete_enemy()
+        heroBullet()
+        draw_Component()
+        deleteCanvaousComponent()
         hero.draw()
-    pygame.init()
-    #設置背景
-    screen = pygame.display.set_mode((480, 800))
-    #設置背景圖片
-    image_bg1 = pygame.image.load('images/bg4.png')
-    image_bg2 = pygame.image.load('images/bg3.png')
-    #enemy
-    image_enemy1 = pygame.image.load('images/enemy1.png')
-    image_enemy2 = pygame.image.load('images/enemy2.png')
-    image_enemy2 = pygame.transform.scale(image_enemy2, (195//2 , 142//2))
-    image_enemy3 = pygame.image.load('images/enemy3.png')
-    image_enemy3 = pygame.transform.scale(image_enemy3, (180 // 2, 169 // 2))
-    image_enemy4 = pygame.image.load('images/enemy4.png')
-    image_enemy4 = pygame.transform.scale(image_enemy4, (156 // 2, 124 // 2))
-    #hero
-    image_hero = pygame.image.load('images/hero.png', )
-
-    screen.blit(image_bg1,(0,0))
+        print(len(list_bullet))
     bg = Bg()
     hero = Hero()
-
     while True:
         running()
         for event in pygame.event.get():
@@ -112,7 +143,7 @@ def main():
         pygame.display.update()
 
 
-
 if __name__ == '__main__':
     lastTime = 0
+    herobulletTime = 0
     main()
